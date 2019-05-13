@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AopLite.Net.ClientInterface\AopLite.Net.ClientInterface.csproj" />
+    <ProjectReference Include="..\AopLite.Net.Core\AopLite.Net.Core.csproj" />
+  </ItemGroup>
+
+</Project>
