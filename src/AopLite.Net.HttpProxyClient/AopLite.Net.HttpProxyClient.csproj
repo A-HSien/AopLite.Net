@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AopLite.Net.ClientInterface\AopLite.Net.ClientInterface.csproj" />
-    <ProjectReference Include="..\AopLite.Net.Core\AopLite.Net.Core.csproj" />
+    <ProjectReference Include="..\AopLite.Net.ClientInterface\AopLite.Net.ClientInterface.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\AopLite.Net.Core\AopLite.Net.Core.csproj" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

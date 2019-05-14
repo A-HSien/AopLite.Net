@@ -17,6 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AopLite.Net.ClientInterface\AopLite.Net.ClientInterface.csproj" />
+    <ProjectReference Include="..\AopLite.Net.Core\AopLite.Net.Core.csproj" />
     <ProjectReference Include="..\AopLite.Net.HttpApiTesting.Web\AopLite.Net.HttpApiTesting.Web.csproj" />
     <ProjectReference Include="..\AopLite.Net.HttpProxyClient\AopLite.Net.HttpProxyClient.csproj" />
   </ItemGroup>
