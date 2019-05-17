@@ -9,11 +9,6 @@ namespace AopLite.Net.HttpProxyClient
     {
         private readonly HttpClient client;
 
-        public StrongTypedHttpClient()
-        {
-            client = new HttpClient();
-        }
-
         public StrongTypedHttpClient(HttpClient client)
         {
             this.client = client;

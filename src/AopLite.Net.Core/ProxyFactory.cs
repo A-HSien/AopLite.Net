@@ -6,7 +6,7 @@ using System.Reflection.Emit;
 
 namespace AopLite.Net.Core
 {
-    public class ProxyFactory
+    public class ProxyFactory<T>
     {
 
         private Type generatedType = null;
@@ -27,26 +27,38 @@ namespace AopLite.Net.Core
                 methodResults.Add(methodName, result);
         }
 
-        public object GetProxy(Type sourceType)
+
+        public virtual T GetProxy()
         {
-            if (generatedType == null)
-            {
-                TypeBuilder typeBuilder = getTypeBuilder(sourceType);
-                ConstructorBuilder constructor = typeBuilder.DefineConstructor(
+            var generatedType = GetProxyType();
+            return (T)Activator.CreateInstance(generatedType, new[] { new Dictionary<string, object>() });
+        }
+
+        
+        protected virtual void createConstructor(TypeBuilder typeBuilder)
+        {
+            ConstructorBuilder constructor = typeBuilder.DefineConstructor(
                     MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
                     CallingConventions.Standard,
                     new Type[] { typeof(Dictionary<string, object>) });
 
 
-                createILGeneratorContext(
-                    constructor.GetILGenerator(),
-                    generator =>
-                {
-                    generator.Emit(OpCodes.Ldarg_0);
-                    generator.Emit(OpCodes.Ldarg_1);
-                    generator.Emit(OpCodes.Stfld, typeof(BaseProxy).GetField(nameof(BaseProxy.methodResults), BindingFlags.Instance | BindingFlags.Public));
-                    generator.Emit(OpCodes.Ret);
-                });
+            constructor.GetILGenerator().Then(generator =>
+            {
+                generator.Emit(OpCodes.Ldarg_0);
+                generator.Emit(OpCodes.Ldarg_1);
+                generator.Emit(OpCodes.Stfld, typeof(BaseProxy).GetField(nameof(BaseProxy.MethodResults), BindingFlags.Instance | BindingFlags.Public));
+                generator.Emit(OpCodes.Ret);
+            });
+        }
+
+        public Type GetProxyType()
+        {
+            if (generatedType == null)
+            {
+                var sourceType = typeof(T);
+                TypeBuilder typeBuilder = getTypeBuilder(sourceType);
+                createConstructor(typeBuilder);
 
                 var omitMethods = new List<string>();
                 foreach (var field in sourceType.GetProperties())
@@ -58,25 +70,18 @@ namespace AopLite.Net.Core
                 foreach (var method in sourceType.GetMethods())
                 {
                     if (omitMethods.IndexOf(method.Name) == -1)
-                    {
                         createMethod(method, typeBuilder);
-                    }
                 }
                 generatedType = typeBuilder.CreateTypeInfo();
             }
-
-            ConstructorInfo constructorInfo = generatedType.GetConstructor(new Type[] { typeof(Dictionary<string, object>) });
-            return constructorInfo.Invoke(new object[] { methodResults });
+            return generatedType;
         }
+        
+        protected virtual Type baseType=> typeof(BaseProxy);
 
-        protected virtual void createMethod(MethodInfo method, TypeBuilder typeBuilder)
+        private TypeBuilder getTypeBuilder(Type proxyTargetType)
         {
-            createDefaultMethod(typeBuilder, method.Name, method.GetParameters().Select(a => a.ParameterType).ToArray(), method.ReturnType);
-        }
-
-        private TypeBuilder getTypeBuilder(Type apiType)
-        {
-            var typeSignature = $"DynamicType_{Guid.NewGuid().ToString().Replace("{", "").Replace('-', '$')}";
+            var typeSignature = $"{proxyTargetType.Name}Proxy_{Guid.NewGuid().ToString().Replace("{", "").Replace('-', '$')}";
             var assemblyName = new AssemblyName(typeSignature);
             AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
             ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
@@ -84,8 +89,8 @@ namespace AopLite.Net.Core
                 typeSignature
                 , TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.AutoClass
                 | TypeAttributes.AnsiClass | TypeAttributes.BeforeFieldInit | TypeAttributes.AutoLayout
-                , typeof(BaseProxy)
-                , new Type[] { apiType }
+                , baseType
+                , new Type[] { proxyTargetType }
                 );
             return typeBuilder;
         }
@@ -104,7 +109,7 @@ namespace AopLite.Net.Core
                 );
 
 
-            createILGeneratorContext(getPropMthdBldr.GetILGenerator(), generator =>
+            getPropMthdBldr.GetILGenerator().Then(generator =>
             {
                 generator.Emit(OpCodes.Ldarg_0);
                 generator.Emit(OpCodes.Ldfld, fieldBuilder);
@@ -122,26 +127,31 @@ namespace AopLite.Net.Core
                     );
 
 
-            createILGeneratorContext(setPropMthdBldr.GetILGenerator(), generator =>
-            {
-                Label modifyProperty = generator.DefineLabel();
-                Label exitSet = generator.DefineLabel();
+            setPropMthdBldr.GetILGenerator().Then(generator =>
+           {
+               Label modifyProperty = generator.DefineLabel();
+               Label exitSet = generator.DefineLabel();
 
-                generator.MarkLabel(modifyProperty);
-                generator.Emit(OpCodes.Ldarg_0); // this
-                generator.Emit(OpCodes.Ldarg_1);
-                generator.Emit(OpCodes.Stfld, fieldBuilder);
+               generator.MarkLabel(modifyProperty);
+               generator.Emit(OpCodes.Ldarg_0); // this
+               generator.Emit(OpCodes.Ldarg_1);
+               generator.Emit(OpCodes.Stfld, fieldBuilder);
 
-                generator.Emit(OpCodes.Nop);
-                generator.MarkLabel(exitSet);
-                generator.Emit(OpCodes.Ret);
-            });
+               generator.Emit(OpCodes.Nop);
+               generator.MarkLabel(exitSet);
+               generator.Emit(OpCodes.Ret);
+           });
 
 
             propertyBuilder.SetGetMethod(getPropMthdBldr);
             propertyBuilder.SetSetMethod(setPropMthdBldr);
         }
 
+
+        protected virtual void createMethod(MethodInfo method, TypeBuilder typeBuilder)
+        {
+            createDefaultMethod(typeBuilder, method.Name, method.GetParameters().Select(a => a.ParameterType).ToArray(), method.ReturnType);
+        }
 
         protected void createDefaultMethod(TypeBuilder tb, string methodName, Type[] argsType, Type returnType)
         {
@@ -153,22 +163,17 @@ namespace AopLite.Net.Core
                 );
 
 
-            createILGeneratorContext(methodBuilder.GetILGenerator(), generator =>
-            {
-                if (returnType != typeof(void))
-                {
-                    generator.Emit(OpCodes.Ldarg_0);
-                    generator.Emit(OpCodes.Ldstr, methodName);
-                    generator.Emit(
-                    OpCodes.Call
-                    , typeof(BaseProxy).GetMethod(nameof(BaseProxy.GetMethodResult), BindingFlags.Public | BindingFlags.Instance)
-                    );
-                    generator.Emit(OpCodes.Ret);
-                }
-            });
+            methodBuilder.GetILGenerator().Then(generator =>
+           {
+               if (returnType != typeof(void))
+               {
+                   generator.Emit(OpCodes.Ldarg_0);
+                   generator.Emit(OpCodes.Ldstr, methodName);
+                   var proxyMethod = typeof(BaseProxy).GetMethod(nameof(BaseProxy.GetMethodResult), BindingFlags.Public | BindingFlags.Instance);
+                   generator.Emit(OpCodes.Call, proxyMethod);
+                   generator.Emit(OpCodes.Ret);
+               }
+           });
         }
-
-
-        protected static void createILGeneratorContext(ILGenerator generator, Action<ILGenerator> action) => action(generator);
     }
 }

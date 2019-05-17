@@ -4,20 +4,20 @@ using System.Text;
 
 namespace AopLite.Net.Core
 {
-    public class BaseProxy
+    public abstract class BaseProxy
     {
-        public Dictionary<string, object> methodResults = null;
+        public Dictionary<string, object> MethodResults = null;
 
 
         public void SetMethodResults(Dictionary<string, object> methodResults)
         {
-            this.methodResults = methodResults;
+            this.MethodResults = methodResults;
         }
 
         public object GetMethodResult(string methodName)
         {
-            if (methodResults.ContainsKey(methodName))
-                return methodResults[methodName];
+            if (MethodResults.ContainsKey(methodName))
+                return MethodResults[methodName];
             return null;
         }
 

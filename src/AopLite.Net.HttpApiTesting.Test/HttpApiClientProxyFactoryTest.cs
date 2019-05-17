@@ -3,6 +3,7 @@ using AopLite.Net.HttpApiTesting.Web;
 using AopLite.Net.HttpApiTesting.Web.Controllers;
 using AopLite.Net.HttpProxyClient;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,20 +23,24 @@ namespace AopLite.Net.HttpApiTesting.Test
         [RemoteApi(Path = "api/Values/Query", Query = "time={time}&number={number}&text={text}")]
         Task<DTO> Query(DateTime time, float number, string text);
 
-        [RemoteApi(HttpMethod.Post, Path = "api/Values")]
+        [RemoteApi(ClientInterface.HttpMethod.Post, Path = "api/Values")]
         Task<DTO> CreateCustomer(DTO data);
     }
 
 
-    public class ValuesControllerTest : IClassFixture<WebApplicationFactory<Startup>>
+    public class HttpApiClientProxyFactoryTest : IClassFixture<WebApplicationFactory<Startup>>
     {
         private readonly IValuesController api;
 
-        public ValuesControllerTest(WebApplicationFactory<Startup> factory)
+        public HttpApiClientProxyFactoryTest(WebApplicationFactory<Startup> factory)
         {
-            HttpApiClientProxy.Client = new StrongTypedHttpClient(factory.CreateClient());
-            var proxyFactory = new HttpApiClientProxyFactory(typeof(HttpApiClientProxy));
-            api = (IValuesController)proxyFactory.GetProxy(typeof(IValuesController));
+            var proxyFactory = new HttpApiClientProxyFactory<IValuesController>();
+            var services = new ServiceCollection();
+            services.AddSingleton(factory.CreateClient());
+            services.AddSingleton<StrongTypedHttpClient>();
+            services.AddSingleton(typeof(IValuesController), proxyFactory.GetProxyType());
+            var serviceProvider = services.BuildServiceProvider();
+            api = serviceProvider.GetService<IValuesController>();
         }
 
         [Fact]

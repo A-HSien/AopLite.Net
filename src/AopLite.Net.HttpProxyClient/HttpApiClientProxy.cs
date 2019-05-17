@@ -1,15 +1,19 @@
-﻿using AopLite.Net.Core;
-using System;
+﻿using System;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace AopLite.Net.HttpProxyClient
 {
-    public class HttpApiClientProxy : IHttpApiClientProxy
+    public abstract class HttpApiClientProxy
     {
-        public static StrongTypedHttpClient Client;
+
+        public readonly StrongTypedHttpClient Client;
 
         public Task<T> InvokeHttpGetGeneric<T>(string urlPath, object[] argumentKeys, object[] arguments)
         {
+            var tt = MethodBase.GetCurrentMethod().DeclaringType;
+            var ttt = GetType();
+
             for (var i = 0; i < argumentKeys.Length; i++)
             {
                 var arg = arguments[i];
