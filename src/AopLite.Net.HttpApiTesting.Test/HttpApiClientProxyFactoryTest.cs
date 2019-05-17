@@ -23,8 +23,8 @@ namespace AopLite.Net.HttpApiTesting.Test
         [RemoteApi(Path = "api/Values/Query", Query = "time={time}&number={number}&text={text}")]
         Task<DTO> Query(DateTime time, float number, string text);
 
-        [RemoteApi(ClientInterface.HttpMethod.Post, Path = "api/Values")]
-        Task<DTO> CreateCustomer(DTO data);
+        [RemoteApi(HttpMethod.Post, Path = "api/Values")]
+        Task<DTO> Post(DTO data);
     }
 
 
@@ -75,7 +75,7 @@ namespace AopLite.Net.HttpApiTesting.Test
         public async Task CreateCustomerTest()
         {
             var data = DTO.Create(DTO.Create());
-            var result = await api.CreateCustomer(data);
+            var result = await api.Post(data);
             Assert.Equal(data.TimeValue, result.TimeValue);
             Assert.Equal(data.NumberValue, result.NumberValue);
             Assert.Equal(data.StringValue, result.StringValue);

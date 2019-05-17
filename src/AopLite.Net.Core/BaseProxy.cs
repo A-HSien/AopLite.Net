@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace AopLite.Net.Core
 {
@@ -11,7 +9,7 @@ namespace AopLite.Net.Core
 
         public void SetMethodResults(Dictionary<string, object> methodResults)
         {
-            this.MethodResults = methodResults;
+            MethodResults = methodResults;
         }
 
         public object GetMethodResult(string methodName)

@@ -4,7 +4,6 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using HttpMethod = AopLite.Net.ClientInterface.HttpMethod;
 
 namespace AopLite.Net.HttpProxyClient
 {
