@@ -6,7 +6,7 @@ There is the list of the utilities, and the instructions please refer to use/tes
   
 AopLite.Net.HttpProxyClient -
 1. [StrongTypedHttpClient](https://github.com/A-HSien/AopLite.Net/blob/master/src/AopLite.Net.HttpProxyClient/StrongTypedHttpClient.cs) ([cases](https://github.com/A-HSien/AopLite.Net/blob/master/src/AopLite.Net.HttpApiTesting.Test/StrongTypedHttpClientTest.cs))
-1. [HttpApiClientProxyFactory](https://github.com/A-HSien/AopLite.Net/blob/master/src/AopLite.Net.HttpProxyClient/HttpApiClientProxyFactory.cs) ([cases](https://github.com/A-HSien/AopLite.Net/blob/master/src/AopLite.Net.HttpApiTesting.Test/ValuesControllerTest.cs))
+1. [HttpApiClientProxyFactory](https://github.com/A-HSien/AopLite.Net/blob/master/src/AopLite.Net.HttpProxyClient/HttpApiClientProxyFactory.cs) ([cases](https://github.com/A-HSien/AopLite.Net/blob/master/src/AopLite.Net.HttpApiTesting.Test/HttpApiClientProxyFactoryTest.cs))
 
 
 Try It. Enjoy it. and your PR is always welcome!
