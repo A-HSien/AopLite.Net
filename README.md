@@ -1,6 +1,6 @@
 # AopLite.Net
 
-Some utilities based on C# dynamic proxy technics ([Reflection Emit](https://docs.microsoft.com/dotnet/api/system.reflection.emit.ilgenerator?view=netframework-4.8)).
+Some utilities based on C# dynamic proxy technique ([Reflection Emit](https://docs.microsoft.com/dotnet/api/system.reflection.emit.ilgenerator?view=netframework-4.8)).
 
 There is the list of the utilities, and the instructions please refer to use/test cases.
   
